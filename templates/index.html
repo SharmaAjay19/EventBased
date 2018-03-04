@@ -5,23 +5,60 @@
 <script type="text/javascript" src="/static/socket.io.js"></script>
 <script>
 $(document).ready(function(){
+    var video = document.querySelector('video');
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
     socket.on('my response', function(msg) {
-        $('#log').append('<p>Received: ' + msg.data + '</p>');
+        video.src = msg.data;
+        //$('#log').append('<p>Received: ' + msg.data + '</p>');
     });
-    $('form#emit').submit(function(event) {
+    /*$('form#emit').submit(function(event) {
         socket.emit('my event', {data: $('#emit_data').val()});
         return false;
     });
     $('form#broadcast').submit(function(event) {
         socket.emit('my broadcast event', {data: $('#broadcast_data').val()});
         return false;
-    });
+    });*/
+  var errorCallback = function(e) {
+    console.log('Reeeejected!', e);
+  };
+  
+  navigator.getUserMedia  = navigator.getUserMedia ||
+                          navigator.webkitGetUserMedia ||
+                          navigator.mozGetUserMedia ||
+                          navigator.msGetUserMedia;
+  var hdConstraints = {
+    video: {
+      mandatory: {
+        minWidth: 1280,
+        minHeight: 720
+      }
+    },
+    audio: false
+  };
+  if (navigator.getUserMedia){
+    navigator.getUserMedia(
+        hdConstraints,
+        function(localMediaStream) {
+            socket.emit('my event', {data: window.URL.createObjectURL(localMediaStream)});
+            //video.src = window.URL.createObjectURL(localMediaStream);
+            // Note: onloadedmetadata doesn't fire in Chrome when using it with getUserMedia.
+            // See crbug.com/110938.
+            video.onloadedmetadata = function(e) {
+                // Ready to go. Do some stuff.
+            };
+        },
+        errorCallback);
+  }
+  else{
+    alert("Media Error");
+  }
 });
 </script>
 </head>
 <body>
-<h2>Send:</h2>
+<video autoplay></video>
+<!--<h2>Send:</h2>
 	<form id="emit" method="POST" action='#'>
         <input type="text" name="emit_data" id="emit_data" placeholder="Message">
         <input type="submit" value="Echo">
@@ -31,6 +68,6 @@ $(document).ready(function(){
         <input type="submit" value="Broadcast">
     </form>
 <h2>Receive:</h2>
-<div id="log"></div>
+<div id="log"></div>-->
 </body>
 </html>
