@@ -5,10 +5,11 @@
 <script type="text/javascript" src="/static/socket.io.js"></script>
 <script>
 $(document).ready(function(){
-    var video = document.querySelector('video');
+    var video1 = document.querySelector('vid1');
+    var video2 = document.querySelector('vid2');
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
     socket.on('my response', function(msg) {
-        video.src = msg.data;
+        video1.src = msg.data;
         //$('#log').append('<p>Received: ' + msg.data + '</p>');
     });
     /*$('form#emit').submit(function(event) {
@@ -40,7 +41,8 @@ $(document).ready(function(){
     navigator.getUserMedia(
         hdConstraints,
         function(localMediaStream) {
-            socket.emit('my event', {data: window.URL.createObjectURL(localMediaStream)});
+            video2.src = window.URL.createObjectURL(localMediaStream);
+            socket.emit('my event', {data: video2.src});
             //video.src = window.URL.createObjectURL(localMediaStream);
             // Note: onloadedmetadata doesn't fire in Chrome when using it with getUserMedia.
             // See crbug.com/110938.
@@ -57,7 +59,8 @@ $(document).ready(function(){
 </script>
 </head>
 <body>
-<video autoplay></video>
+<video autoplay id="vid1"></video>
+<video autoplay id="vid2"></video>
 <!--<h2>Send:</h2>
 	<form id="emit" method="POST" action='#'>
         <input type="text" name="emit_data" id="emit_data" placeholder="Message">
